@@ -1,0 +1,84 @@
+
+---
+- name: Get latest NVM release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/nvm-sh/nvm/releases/latest
+    return_content: true
+  register: nvm_release
+  changed_when: false
+
+- name: Install or update NVM
+  ansible.builtin.git:
+    repo: https://github.com/nvm-sh/nvm.git
+    dest: "{{ workstation_home }}/.nvm"
+    version: "{{ nvm_release.json.tag_name }}"
+    update: true
+  become: false
+
+- name: Install or update Node.js
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    export NVM_DIR="{{ workstation_home }}/.nvm"
+    source "$NVM_DIR/nvm.sh"
+
+    before="$(nvm version default 2>/dev/null || true)"
+
+    nvm install node
+    nvm alias default node
+
+    after="$(nvm version default)"
+
+    if [[ "$before" != "$after" ]]; then
+      echo "NODE_CHANGED"
+    fi
+  args:
+    executable: /bin/bash
+  register: node_result
+  changed_when: "'NODE_CHANGED' in node_result.stdout"
+  become: false
+
+- name: Get latest pnpm version
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    export NVM_DIR="{{ workstation_home }}/.nvm"
+    source "$NVM_DIR/nvm.sh"
+    nvm use default >/dev/null
+
+    npm view pnpm version
+  args:
+    executable: /bin/bash
+  register: pnpm_latest
+  changed_when: false
+  become: false
+
+- name: Check installed pnpm version
+  ansible.builtin.shell: |
+    export NVM_DIR="{{ workstation_home }}/.nvm"
+    source "$NVM_DIR/nvm.sh"
+    nvm use default >/dev/null
+
+    pnpm --version
+  args:
+    executable: /bin/bash
+  register: pnpm_installed
+  changed_when: false
+  failed_when: false
+  become: false
+
+- name: Install or update pnpm
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    export NVM_DIR="{{ workstation_home }}/.nvm"
+    source "$NVM_DIR/nvm.sh"
+    nvm use default >/dev/null
+
+    npm install --global pnpm@latest
+  args:
+    executable: /bin/bash
+  when: >
+    pnpm_installed.rc != 0 or
+    pnpm_installed.stdout | trim != pnpm_latest.stdout | trim
+  become: false

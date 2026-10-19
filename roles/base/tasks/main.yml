@@ -1,0 +1,34 @@
+---
+- name: Install common workstation prerequisites
+  ansible.builtin.apt:
+    name:
+      - git
+      - curl
+      - ca-certificates
+      - gnupg
+      - wget
+      - unzip
+      - xz-utils
+      - build-essential
+    state: present
+    update_cache: true
+  become: true
+
+- name: Create APT keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Ensure local binaries are available in shell PATH
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/{{ item }}"
+    regexp: '^export PATH="\$HOME/\.local/bin:\$PATH"$'
+    line: 'export PATH="$HOME/.local/bin:$PATH"'
+    create: true
+    state: present
+  loop:
+    - .bashrc
+    - .zshrc
+  become: false

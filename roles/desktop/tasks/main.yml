@@ -1,0 +1,42 @@
+---
+- name: Install desktop configuration tools and Flameshot
+  ansible.builtin.apt:
+    name: [dconf-cli, flameshot]
+    state: present
+  become: true
+
+- name: Create Cinnamon applets directory
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/cinnamon/applets"
+    state: directory
+    mode: '0755'
+
+- name: Install Cinnamon applets from Spices
+  ansible.builtin.unarchive:
+    src: "https://cinnamon-spices.linuxmint.com/files/applets/{{ item }}.zip"
+    dest: "{{ workstation_home }}/.local/share/cinnamon/applets"
+    remote_src: true
+    creates: "{{ workstation_home }}/.local/share/cinnamon/applets/{{ item }}"
+  loop: "{{ cinnamon_applets }}"
+
+- name: Configure Cinnamon preferences and Flameshot shortcut
+  ansible.builtin.script: "{{ role_path }}/files/configure-desktop.sh"
+  environment:
+    HOME: "{{ workstation_home }}"
+    CINNAMON_PANELS_ENABLED: "{{ cinnamon_panels_enabled | to_json }}"
+    CINNAMON_PANELS_HEIGHT: "{{ cinnamon_panels_height | to_json }}"
+    CINNAMON_PANEL_ICON_SIZES: "{{ cinnamon_panel_zone_icon_sizes }}"
+    CINNAMON_FONT_NAME: "{{ cinnamon_font_name }}"
+    CINNAMON_FONT_SCALE: "{{ cinnamon_text_scaling_factor }}"
+    CINNAMON_PANEL_SYMBOLIC_ICON_SIZES: "{{ cinnamon_panel_zone_symbolic_icon_sizes }}"
+    CINNAMON_GTK_THEME: "{{ cinnamon_gtk_theme }}"
+    CINNAMON_ICON_THEME: "{{ cinnamon_icon_theme }}"
+    CINNAMON_CURSOR_THEME: "{{ cinnamon_cursor_theme }}"
+    CINNAMON_SHELL_THEME: "{{ cinnamon_shell_theme }}"
+    CINNAMON_TITLEBAR_FONT: "{{ cinnamon_titlebar_font }}"
+    CINNAMON_APPLETS: "{{ cinnamon_applets | join(' ') }}"
+    CINNAMON_MENU_ICON_SIZE: "{{ cinnamon_menu_icon_size }}"
+    CINNAMON_MOUSE_SPEED: "{{ cinnamon_mouse_speed }}"
+    CINNAMON_MOUSE_NATURAL_SCROLL: "{{ cinnamon_mouse_natural_scroll | lower }}"
+    DISPLAY: "{{ lookup('env', 'DISPLAY') }}"
+    DBUS_SESSION_BUS_ADDRESS: "{{ lookup('env', 'DBUS_SESSION_BUS_ADDRESS') }}"

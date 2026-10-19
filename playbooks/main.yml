@@ -1,0 +1,30 @@
+---
+- name: Configure Linux Mint workstation
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_files:
+    - ../group_vars/all.yml
+  vars:
+    workstation_user: "{{ lookup('env', 'USER') }}"
+    workstation_home: "{{ lookup('env', 'HOME') }}"
+    ubuntu_codename: >-
+      {{ lookup('pipe', "awk -F= '/^UBUNTU_CODENAME=/ {print $2}' /etc/os-release") | trim }}
+  pre_tasks:
+    - name: Ensure AMD64 architecture
+      ansible.builtin.assert:
+        that: ansible_facts['architecture'] == 'x86_64'
+        fail_msg: 'This setup currently supports AMD64/x86_64 only.'
+      tags: [always]
+  roles:
+    - { role: base, tags: [always, base, apps] }
+    - { role: applications, tags: [applications, apps] }
+    - { role: docker, tags: [docker, apps] }
+    - { role: github_cli, tags: [github, github_cli, dev] }
+    - { role: editor, tags: [editor, dev] }
+    - { role: node, tags: [node, dev] }
+    - { role: claude_code, tags: [claude, claude_code, ai, dev] }
+    - { role: codex_cli, tags: [codex, codex_cli, ai, dev] }
+    - { role: shell, tags: [shell] }
+    - { role: webapps, tags: [webapps] }
+    - { role: desktop, tags: [desktop] }

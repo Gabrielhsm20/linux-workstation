@@ -1,0 +1,5 @@
+# Local runtime data
+*.log
+*.retry
+__pycache__/
+.DS_Store

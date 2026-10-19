@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name={{ item.name }}
+Exec=/usr/bin/google-chrome-stable --app={{ item.url }} --class=WebApp-{{ item.slug }} --name=WebApp-{{ item.slug }} --user-data-dir={{ workstation_home }}/.config/chrome-webapps/{{ item.slug }}
+Terminal=false
+{% if item.icon_url | default('') %}
+Icon={{ workstation_home }}/.local/share/icons/hicolor/scalable/apps/{{ item.slug }}.svg
+{% elif item.icon | default('') %}
+Icon={{ item.icon }}
+{% else %}
+Icon=google-chrome
+{% endif %}
+Categories=Network;InstantMessaging;
+StartupWMClass=WebApp-{{ item.slug }}
+StartupNotify=true

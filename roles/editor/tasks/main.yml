@@ -1,0 +1,30 @@
+---
+- name: Download VS Code repository key
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    dest: /etc/apt/keyrings/microsoft.asc
+    mode: '0644'
+  become: true
+- name: Configure VS Code repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/vscode.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://packages.microsoft.com/repos/code
+      Suites: stable
+      Components: main
+      Architectures: amd64
+      Signed-By: /etc/apt/keyrings/microsoft.asc
+  become: true
+- name: Install VS Code
+  ansible.builtin.apt:
+    name: code
+    state: present
+    update_cache: true
+  become: true
+- name: Install VS Code extensions
+  ansible.builtin.command: "code --install-extension {{ item }} --force"
+  loop: "{{ vscode_extensions }}"
+  register: vscode_install
+  changed_when: "'successfully installed' in (vscode_install.stdout | lower)"

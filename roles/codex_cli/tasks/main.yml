@@ -1,0 +1,38 @@
+---
+- name: Check Codex CLI executable
+  ansible.builtin.stat:
+    path: "{{ workstation_home }}/.local/bin/codex"
+  register: codex_cli_binary
+
+- name: Install Codex CLI via the official standalone installer
+  when: not codex_cli_binary.stat.exists
+  block:
+    - name: Create private download directory
+      ansible.builtin.file:
+        path: "{{ workstation_home }}/.cache/linux-mint-setup"
+        state: directory
+        mode: '0700'
+
+    - name: Download the official Codex installer
+      ansible.builtin.get_url:
+        url: https://chatgpt.com/codex/install.sh
+        dest: "{{ workstation_home }}/.cache/linux-mint-setup/install-codex.sh"
+        mode: '0700'
+
+    - name: Run the official Codex installer
+      ansible.builtin.command:
+        cmd: "sh {{ workstation_home }}/.cache/linux-mint-setup/install-codex.sh"
+      environment:
+        HOME: "{{ workstation_home }}"
+        CODEX_NON_INTERACTIVE: "1"
+      become: false
+
+- name: Verify Codex CLI version
+  ansible.builtin.command:
+    argv: ["{{ workstation_home }}/.local/bin/codex", "--version"]
+  register: codex_cli_version
+  changed_when: false
+
+- name: Display Codex CLI version
+  ansible.builtin.debug:
+    msg: "{{ codex_cli_version.stdout }}"

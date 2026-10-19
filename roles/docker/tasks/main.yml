@@ -1,0 +1,41 @@
+---
+- name: Download Docker repository key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+  become: true
+
+- name: Configure upstream Ubuntu Docker repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/docker.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://download.docker.com/linux/ubuntu
+      Suites: {{ ubuntu_codename }}
+      Components: stable
+      Architectures: amd64
+      Signed-By: /etc/apt/keyrings/docker.asc
+  become: true
+
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+    state: present
+    update_cache: true
+  become: true
+- name: Start and enable Docker service
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: true
+    state: started
+  become: true
+
+# The docker group grants root-equivalent privileges.
+- name: Add user to Docker group
+  ansible.builtin.user:
+    name: "{{ workstation_user }}"
+    groups: docker
+    append: true
+  become: true

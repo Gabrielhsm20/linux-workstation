@@ -1,0 +1,20 @@
+---
+- name: Install Google Chrome and DBeaver from official DEB packages
+  ansible.builtin.apt:
+    deb: "{{ item }}"
+    state: present
+  become: true
+  loop:
+    - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    - https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb
+- name: Create local application directory
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/opt"
+    state: directory
+    mode: '0755'
+- name: Install Postman and desktop launcher
+  ansible.builtin.script: "{{ role_path }}/files/install-postman.sh"
+  args:
+    creates: "{{ workstation_home }}/.local/opt/Postman/Postman"
+  environment:
+    HOME: "{{ workstation_home }}"

@@ -1,0 +1,42 @@
+---
+- name: Check existing Claude Code native installation
+  ansible.builtin.stat:
+    path: "{{ workstation_home }}/.local/bin/claude"
+  register: claude_code_binary
+
+- name: Install Claude Code using the official native installer
+  when: not claude_code_binary.stat.exists
+  block:
+    - name: Ensure download cache directory exists
+      ansible.builtin.file:
+        path: "{{ workstation_home }}/.cache"
+        state: directory
+        mode: '0700'
+
+    - name: Download the official Claude Code installer
+      ansible.builtin.get_url:
+        url: https://claude.ai/install.sh
+        dest: "{{ workstation_home }}/.cache/claude-code-install.sh"
+        mode: '0700'
+      # Download from the official site; review before running if desired.
+
+    - name: Run the Claude Code native installer
+      ansible.builtin.command:
+        argv:
+          - bash
+          - "{{ workstation_home }}/.cache/claude-code-install.sh"
+      environment:
+        HOME: "{{ workstation_home }}"
+      changed_when: true
+
+- name: Check installed Claude Code version
+  ansible.builtin.command:
+    argv:
+      - "{{ workstation_home }}/.local/bin/claude"
+      - --version
+  register: claude_code_version
+  changed_when: false
+
+- name: Show Claude Code version
+  ansible.builtin.debug:
+    msg: "{{ claude_code_version.stdout }}"

@@ -1,0 +1,17 @@
+---
+- name: Install Zsh and Powerline fonts
+  ansible.builtin.apt:
+    name: [zsh, fonts-powerline]
+    state: present
+  become: true
+
+- name: Install Oh My Zsh and plugins
+  ansible.builtin.script: "{{ role_path }}/files/install-zsh.sh"
+  environment:
+    HOME: "{{ workstation_home }}"
+
+- name: Set Zsh as default shell
+  ansible.builtin.user:
+    name: "{{ workstation_user }}"
+    shell: /usr/bin/zsh
+  become: true

@@ -1,0 +1,55 @@
+---
+node_version: '22'
+# Adjust the Node.js major version for your projects.
+
+vscode_extensions:
+  - Vue.volar
+  - Prisma.prisma
+  - ms-azuretools.vscode-containers
+  - eamodio.gitlens
+  - donjayamanne.githistory
+  - OpenAI.chatgpt  # Official Codex extension
+  - dbaeumer.vscode-eslint
+
+# For icon_url, the webapps role downloads the SVG to the user's local icon directory.
+# For icon, supply an existing local icon filename/path or theme icon name.
+# An empty icon deliberately falls back to google-chrome; customize it later.
+# Bundled icons live in roles/webapps/files and are installed into the hicolor theme.
+web_apps:
+  - name: WhatsApp
+    slug: whatsapp
+    url: https://web.whatsapp.com
+    icon: web-whatsapp  # Linux Mint theme icon, same one used by the Web Apps manager
+
+  - name: WhatsApp Business
+    slug: whatsapp-business
+    url: https://web.whatsapp.com
+    icon: whatsapp-business  # PNG bundled in roles/webapps/files
+
+
+# Preferences captured on Linux Mint 22.3 Zena / Cinnamon / X11.
+# Explicit configuration; no dconf backup required.
+cinnamon_panels_enabled:
+  - '1:0:bottom'
+cinnamon_panels_height:
+  - '1:36'
+cinnamon_panel_zone_icon_sizes: '[{"panelId": 1, "left": 24, "center": 0, "right": 24}]'
+cinnamon_font_name: 'Ubuntu 10'
+cinnamon_text_scaling_factor: 1.0
+
+# Cinnamon appearance (collected using gsettings/dconf).
+cinnamon_panel_zone_symbolic_icon_sizes: '[{"panelId": 1, "left": 26, "center": 28, "right": 16}]'
+cinnamon_gtk_theme: 'Mint-Y-Dark-Blue'
+cinnamon_icon_theme: 'Mint-Y-Blue'
+cinnamon_cursor_theme: 'Bibata-Modern-Classic'
+cinnamon_shell_theme: 'Mint-Y-Dark-Blue'
+cinnamon_titlebar_font: 'Ubuntu Medium 10'
+cinnamon_mouse_speed: 0.0
+cinnamon_mouse_natural_scroll: false
+cinnamon_menu_icon_size: 24
+
+# Cinnamon applets from cinnamon-spices.linuxmint.com, installed and enabled on the right of the panel.
+cinnamon_applets:
+  - cpu-monitor-text@gnemonix        # Simple CPU Monitor (gnemonix)
+  - mem-monitor-text@datanom.net     # Simple Memory Monitor (icarter09)
+

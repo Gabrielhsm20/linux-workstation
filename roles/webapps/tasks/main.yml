@@ -1,0 +1,40 @@
+---
+- name: Create user application launcher directory
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/applications"
+    state: directory
+    mode: '0755'
+
+- name: Create user application icon directory
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/icons/hicolor/scalable/apps"
+    state: directory
+    mode: '0755'
+
+- name: Create bundled PNG icon directory
+  ansible.builtin.file:
+    path: "{{ workstation_home }}/.local/share/icons/hicolor/512x512/apps"
+    state: directory
+    mode: '0755'
+
+- name: Install bundled web app icons
+  ansible.builtin.copy:
+    src: whatsapp-business.png
+    dest: "{{ workstation_home }}/.local/share/icons/hicolor/512x512/apps/whatsapp-business.png"
+    mode: '0644'
+
+- name: Download available web app icons
+  ansible.builtin.get_url:
+    url: "{{ item.icon_url }}"
+    dest: "{{ workstation_home }}/.local/share/icons/hicolor/scalable/apps/{{ item.slug }}.svg"
+    mode: '0644'
+    force: false
+  loop: "{{ web_apps }}"
+  when: (item.icon_url | default('') | length) > 0
+
+- name: Create Chrome web app launchers
+  ansible.builtin.template:
+    src: webapp.desktop.j2
+    dest: "{{ workstation_home }}/.local/share/applications/{{ item.slug }}.desktop"
+    mode: '0644'
+  loop: "{{ web_apps }}"
