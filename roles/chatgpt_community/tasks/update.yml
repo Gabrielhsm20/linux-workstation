@@ -1,0 +1,19 @@
+---
+- name: Update community sources using a fast-forward pull
+  ansible.builtin.command: git pull --ff-only
+  args:
+    chdir: "{{ chatgpt_community_source }}"
+  register: chatgpt_community_pull
+  changed_when: "'Already up to date.' not in chatgpt_community_pull.stdout"
+  environment:
+    LC_ALL: C
+  become: false
+
+- name: Rebuild and install the native package without the automatic updater
+  ansible.builtin.command: make install-native
+  args:
+    chdir: "{{ chatgpt_community_source }}"
+  environment:
+    PACKAGE_WITH_UPDATER: '0'
+  changed_when: true
+  become: false

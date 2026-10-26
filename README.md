@@ -18,6 +18,7 @@ linux-setup/
     ├── editor/tasks/main.yml
     ├── claude_code/tasks/main.yml     # Official native Claude Code installation
     ├── codex_cli/tasks/main.yml       # Official standalone Codex CLI installation
+    ├── chatgpt_community/             # Optional community desktop app (never runs by default)
     ├── node/tasks/main.yml
     ├── node/files/install-node.sh
     ├── shell/tasks/main.yml
@@ -83,7 +84,7 @@ Run `./setup.sh --tags webapps` to refresh the launchers and icons.
 - Docker group membership grants root-equivalent access; log out and back in after installation.
 - A session restart may be needed for Cinnamon preferences and the default Zsh shell.
 - WhatsApp and WhatsApp Business launch the same web address in separate Chrome profiles; login is manual.
-- ChatGPT Community is installed from the third-party `ilysenko/codex-desktop-linux` source when its role runs. Its `make bootstrap-native` builds a Debian package and may invoke sudo; review that upstream Makefile and pin a trusted commit before running on a production workstation. The source and build requirements can change.
+- The optional ChatGPT Community role builds third-party source and downloads the current signed stable upstream payload. Review the community repository before running it; source and build requirements can change.
 - This is a starter project and has not been exercised end-to-end on a clean Mint install. Test before wiping your current machine.
 
 ## Claude Code
@@ -97,3 +98,20 @@ Run `./setup.sh --tags claude` to install only Claude Code. Open a new terminal,
 `codex_cli` uses the official standalone installer (`https://chatgpt.com/codex/install.sh`) and does not require npm or NVM. `OpenAI.chatgpt` is already listed in `vscode_extensions` as the official Codex VS Code extension, so there is no duplicate installation.
 
 Run `./setup.sh --tags codex` and then `codex --version`, `codex`. Sign in interactively. The installer will be skipped if `~/.local/bin/codex` exists.
+
+## ChatGPT Community (optional)
+
+Skipped by default. Install or update explicitly:
+
+```bash
+./setup.sh --tags chatgpt_community         # Install only if missing
+./setup.sh --tags chatgpt_community_update  # Pull sources and rebuild
+```
+
+Automatic updates are disabled. Updates replace the existing package.
+
+```bash
+dpkg-query -W codex-desktop     # Verify installation
+command -v codex-desktop       # Locate executable
+sudo apt remove codex-desktop  # Uninstall
+```

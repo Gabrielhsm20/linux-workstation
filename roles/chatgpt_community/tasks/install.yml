@@ -1,0 +1,31 @@
+---
+- name: Create the source parent directory
+  ansible.builtin.file:
+    path: "{{ chatgpt_community_source | dirname }}"
+    state: directory
+    mode: '0755'
+  become: false
+
+- name: Clone the ChatGPT Community repository
+  ansible.builtin.git:
+    repo: "{{ chatgpt_community_repo }}"
+    dest: "{{ chatgpt_community_source }}"
+    version: main
+    update: false
+  become: false
+
+- name: Install dependencies using the upstream script
+  ansible.builtin.command: bash scripts/install-deps.sh
+  args:
+    chdir: "{{ chatgpt_community_source }}"
+  changed_when: true
+  become: false
+
+- name: Build and install the native package without the automatic updater
+  ansible.builtin.command: make install-native
+  args:
+    chdir: "{{ chatgpt_community_source }}"
+  environment:
+    PACKAGE_WITH_UPDATER: '0'
+  changed_when: true
+  become: false
