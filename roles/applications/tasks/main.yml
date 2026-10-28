@@ -7,6 +7,13 @@
   loop:
     - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
     - https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb
+- name: Install SimpleScreenRecorder from the distribution repositories
+  ansible.builtin.apt:
+    name: simplescreenrecorder
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
 - name: Create local application directory
   ansible.builtin.file:
     path: "{{ workstation_home }}/.local/opt"
