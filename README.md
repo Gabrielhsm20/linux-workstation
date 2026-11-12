@@ -20,6 +20,7 @@ linux-setup/
     ├── codex_cli/tasks/main.yml       # Official standalone Codex CLI installation
     ├── chatgpt_community/             # Optional community desktop app (never runs by default)
     ├── aws_cli/                       # Optional official AWS CLI v2 installer (never runs by default)
+    ├── terraform/                      # Optional Terraform from the HashiCorp APT repository (never runs by default)
     ├── node/tasks/main.yml
     ├── node/files/install-node.sh
     ├── shell/tasks/main.yml
@@ -137,3 +138,26 @@ sudo /usr/local/bin/aws --version  # Installed under /usr/local/aws-cli
 ```
 
 To uninstall, remove `/usr/local/aws-cli`, `/usr/local/bin/aws` and `/usr/local/bin/aws_completer`.
+
+## Terraform (optional)
+
+Skipped by default. The role adds the official HashiCorp APT repository and installs
+`terraform`, so later upgrades come through `apt upgrade`.
+
+```bash
+./setup.sh --tags terraform
+```
+
+On Linux Mint the repository suite must be the **Ubuntu base codename**
+(`UBUNTU_CODENAME` in `/etc/os-release`, e.g. `noble`), not the Mint codename returned by
+`lsb_release -cs` (e.g. `zena`), which HashiCorp does not publish. The role resolves this
+automatically and removes a previous one-line `/etc/apt/sources.list.d/hashicorp.list`
+to avoid a duplicate APT entry.
+
+The role fails if the installed version is older than `terraform_min_version`
+(`1.9` by default, overridable in `group_vars/all.yml`).
+
+```bash
+terraform -version            # Verify installation
+sudo apt remove terraform     # Uninstall
+```

@@ -1,0 +1,5 @@
+---
+terraform_repo_url: https://apt.releases.hashicorp.com
+terraform_key_url: https://apt.releases.hashicorp.com/gpg
+terraform_key_path: /etc/apt/keyrings/hashicorp-archive-keyring.asc
+terraform_min_version: '1.9'

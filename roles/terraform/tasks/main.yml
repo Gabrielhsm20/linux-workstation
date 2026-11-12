@@ -1,0 +1,61 @@
+---
+# Linux Mint reports its own codename (zena, wilma, ...), which HashiCorp does not
+# publish. The repository suite must be the Ubuntu base codename from /etc/os-release.
+- name: Ensure the Ubuntu base codename was detected
+  ansible.builtin.assert:
+    that: ubuntu_codename | default('') | length > 0
+    fail_msg: 'UBUNTU_CODENAME is missing from /etc/os-release; cannot select a HashiCorp suite.'
+
+- name: Download the HashiCorp repository key
+  ansible.builtin.get_url:
+    url: "{{ terraform_key_url }}"
+    dest: "{{ terraform_key_path }}"
+    mode: '0644'
+  become: true
+
+- name: Remove a legacy one-line HashiCorp APT entry
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/hashicorp.list
+    state: absent
+  become: true
+
+- name: Configure the HashiCorp APT repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/hashicorp.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: {{ terraform_repo_url }}
+      Suites: {{ ubuntu_codename }}
+      Components: main
+      Architectures: amd64
+      Signed-By: {{ terraform_key_path }}
+  become: true
+
+- name: Install Terraform
+  ansible.builtin.apt:
+    name: terraform
+    state: present
+    update_cache: true
+  become: true
+
+- name: Read the installed Terraform version
+  ansible.builtin.command:
+    argv: [terraform, version, -json]
+  register: terraform_version
+  changed_when: false
+  become: false
+
+- name: Verify the minimum Terraform version
+  ansible.builtin.assert:
+    that: >-
+      (terraform_version.stdout | from_json).terraform_version
+      is version(terraform_min_version, '>=')
+    fail_msg: >-
+      Terraform {{ (terraform_version.stdout | from_json).terraform_version }}
+      is older than the required {{ terraform_min_version }}.
+
+- name: Report the installed version
+  ansible.builtin.debug:
+    msg: >-
+      Terraform {{ (terraform_version.stdout | from_json).terraform_version }} is installed.
