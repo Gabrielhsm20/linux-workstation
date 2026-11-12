@@ -19,6 +19,7 @@ linux-setup/
     ├── claude_code/tasks/main.yml     # Official native Claude Code installation
     ├── codex_cli/tasks/main.yml       # Official standalone Codex CLI installation
     ├── chatgpt_community/             # Optional community desktop app (never runs by default)
+    ├── aws_cli/                       # Optional official AWS CLI v2 installer (never runs by default)
     ├── node/tasks/main.yml
     ├── node/files/install-node.sh
     ├── shell/tasks/main.yml
@@ -115,3 +116,24 @@ dpkg-query -W codex-desktop     # Verify installation
 command -v codex-desktop       # Locate executable
 sudo apt remove codex-desktop  # Uninstall
 ```
+
+## AWS CLI (optional)
+
+Skipped by default. The role uses the official AWS CLI v2 `.zip` installer, not the
+outdated `awscli` v1 package from the distribution repositories.
+
+```bash
+./setup.sh --tags aws         # Install only if missing
+./setup.sh --tags aws_cli_update  # Reinstall over the existing version
+```
+
+Credentials are never automated. Configure them yourself:
+
+```bash
+aws --version          # Verify installation
+aws configure          # Access keys
+aws configure sso      # IAM Identity Center
+sudo /usr/local/bin/aws --version  # Installed under /usr/local/aws-cli
+```
+
+To uninstall, remove `/usr/local/aws-cli`, `/usr/local/bin/aws` and `/usr/local/bin/aws_completer`.

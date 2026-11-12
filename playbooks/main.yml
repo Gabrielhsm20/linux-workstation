@@ -26,6 +26,7 @@
     - { role: claude_code, tags: [claude, claude_code, ai, dev] }
     - { role: codex_cli, tags: [codex, codex_cli, ai, dev] }
     - { role: chatgpt_community, tags: [never, chatgpt_community, chatgpt_community_update] }
+    - { role: aws_cli, tags: [never, aws, aws_cli, aws_cli_update] }
     - { role: shell, tags: [shell] }
     - { role: webapps, tags: [webapps] }
     - { role: desktop, tags: [desktop] }

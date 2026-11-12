@@ -1,0 +1,38 @@
+---
+- name: Check the installed AWS CLI executable
+  ansible.builtin.shell: command -v aws
+  args:
+    executable: /bin/bash
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  register: aws_cli_existing
+  changed_when: false
+  failed_when: false
+  become: false
+
+- name: Install AWS CLI when the executable is absent
+  ansible.builtin.include_tasks: install.yml
+  when: aws_cli_existing.rc != 0
+
+- name: Update an existing AWS CLI installation when requested
+  ansible.builtin.include_tasks: install.yml
+  vars:
+    aws_cli_update: true
+  when:
+    - aws_cli_existing.rc == 0
+    - "'aws_cli_update' in ansible_run_tags"
+
+- name: Verify the installed executable
+  ansible.builtin.command:
+    argv: [aws, --version]
+  register: aws_cli_version
+  changed_when: false
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  become: false
+
+- name: Report the installed version
+  ansible.builtin.debug:
+    msg: >-
+      {{ aws_cli_version.stdout | trim }} is installed.
+      Configure credentials manually with `aws configure` or `aws configure sso`.

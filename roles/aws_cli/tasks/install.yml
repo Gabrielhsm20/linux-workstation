@@ -1,0 +1,43 @@
+---
+- name: Install the unzip prerequisite
+  ansible.builtin.apt:
+    name: unzip
+    state: present
+    update_cache: true
+  become: true
+
+- name: Create an empty download directory for the installer
+  ansible.builtin.file:
+    path: "{{ aws_cli_download_dir }}"
+    state: "{{ item }}"
+    mode: '0755'
+  loop: [absent, directory]
+  become: false
+
+- name: Download the official AWS CLI v2 installer
+  ansible.builtin.get_url:
+    url: "{{ aws_cli_url }}"
+    dest: "{{ aws_cli_download_dir }}/awscliv2.zip"
+    mode: '0644'
+  become: false
+
+- name: Unpack the installer
+  ansible.builtin.unarchive:
+    src: "{{ aws_cli_download_dir }}/awscliv2.zip"
+    dest: "{{ aws_cli_download_dir }}"
+    remote_src: true
+  become: false
+
+- name: Run the bundled installer
+  ansible.builtin.command:
+    argv: >-
+      {{ [aws_cli_download_dir ~ '/aws/install']
+         + (['--update'] if aws_cli_update | default(false) else []) }}
+  changed_when: true
+  become: true
+
+- name: Remove the download directory
+  ansible.builtin.file:
+    path: "{{ aws_cli_download_dir }}"
+    state: absent
+  become: false
