@@ -1,0 +1,59 @@
+---
+- name: Check the installed Session Manager plugin
+  ansible.builtin.shell: command -v session-manager-plugin
+  args:
+    executable: /bin/bash
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  register: aws_ssm_plugin_existing
+  changed_when: false
+  failed_when: false
+  become: false
+
+- name: Install or update the Session Manager plugin
+  when: >-
+    aws_ssm_plugin_existing.rc != 0
+    or 'aws_ssm_plugin_update' in ansible_run_tags
+  block:
+    - name: Create an empty download directory
+      ansible.builtin.file:
+        path: "{{ aws_ssm_plugin_download_dir }}"
+        state: "{{ item }}"
+        mode: '0755'
+      loop: [absent, directory]
+      become: false
+
+    - name: Download the official Session Manager plugin package
+      ansible.builtin.get_url:
+        url: "{{ aws_ssm_plugin_url }}"
+        dest: "{{ aws_ssm_plugin_download_dir }}/session-manager-plugin.deb"
+        mode: '0644'
+      become: false
+
+    - name: Install the package
+      ansible.builtin.apt:
+        deb: "{{ aws_ssm_plugin_download_dir }}/session-manager-plugin.deb"
+        state: present
+      become: true
+
+  always:
+    - name: Remove the download directory
+      ansible.builtin.file:
+        path: "{{ aws_ssm_plugin_download_dir }}"
+        state: absent
+      become: false
+
+- name: Verify the installed plugin
+  ansible.builtin.command:
+    argv: [session-manager-plugin, --version]
+  register: aws_ssm_plugin_version
+  changed_when: false
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  become: false
+
+- name: Report the installed version
+  ansible.builtin.debug:
+    msg: >-
+      Session Manager plugin {{ aws_ssm_plugin_version.stdout | trim }} is installed.
+      Use it with `aws ssm start-session --target <instance-id>`.

@@ -20,6 +20,7 @@ linux-setup/
     ├── codex_cli/tasks/main.yml       # Official standalone Codex CLI installation
     ├── chatgpt_community/             # Optional community desktop app (never runs by default)
     ├── aws_cli/                       # Optional official AWS CLI v2 installer (never runs by default)
+    ├── aws_session_manager_plugin/    # Optional AWS Session Manager plugin .deb (never runs by default)
     ├── terraform/                      # Optional Terraform from the HashiCorp APT repository (never runs by default)
     ├── node/tasks/main.yml
     ├── node/files/install-node.sh
@@ -138,6 +139,23 @@ sudo /usr/local/bin/aws --version  # Installed under /usr/local/aws-cli
 ```
 
 To uninstall, remove `/usr/local/aws-cli`, `/usr/local/bin/aws` and `/usr/local/bin/aws_completer`.
+
+## AWS Session Manager plugin (optional)
+
+Skipped by default. Required by `aws ssm start-session`. The role installs the official
+`.deb` package (x86_64) and skips the install when `session-manager-plugin` already exists.
+
+```bash
+./setup.sh --tags aws_ssm_plugin          # Install only if missing
+./setup.sh --tags aws_ssm_plugin_update   # Reinstall the latest package
+```
+
+```bash
+session-manager-plugin --version
+aws ssm start-session --target <instance-id>
+```
+
+To uninstall: `sudo dpkg -r session-manager-plugin`.
 
 ## Terraform (optional)
 
